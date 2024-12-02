@@ -1,39 +1,50 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-int parseNum(char **str) {
-  int num = 0;
+int parseLine(char *str, int *arr) {
+  int i = 0;
 
-  while (**str >= '0' && **str <= '9') {
-    num = num * 10 + **str - '0';
-    (*str)++;
+  char *current = str;
+  char *next;
+  int num = strtol(current, &next, 10);
+
+  while (next > current) {
+    current = next;
+    arr[i++] = num;
+    num = strtol(current, &next, 10);
   }
 
-  return num;
+  return i;
 }
 
-bool checkReport(char *str) {
-  int prevNum = parseNum(&str);
-  // ++ so that the pointer ends up on next number starting position
-  str++;
-  int num = parseNum(&str);
-  str++;
+bool checkReport(int *nums, int count, int skipIndex) {
+  // printNums(nums, count, skipIndex);
+  int i = 0;
+  if (skipIndex == 0)
+    i++; // discard first
+
+  int prevNum = nums[i++];
+
+  if (skipIndex == 1)
+    i++; // discard second
+
+  int num = nums[i++];
 
   bool increasing = num > prevNum;
 
-  int diff = 0;
-  if (increasing) {
-    diff = num - prevNum;
-  } else {
-    diff = prevNum - num;
-  }
+  int diff = increasing ? num - prevNum : prevNum - num;
 
   if (diff < 1 || diff > 3) {
     return false;
   }
 
-  while (*str) {
-    int nextNum = parseNum(&str);
+  while (i < count) {
+    if (i == skipIndex) {
+      i++;
+      continue;
+    }
+    int nextNum = nums[i++];
 
     int diff = 0;
     if (increasing) {
@@ -47,7 +58,6 @@ bool checkReport(char *str) {
     }
 
     num = nextNum;
-    str++;
   }
 
   return true;
@@ -58,11 +68,18 @@ int main(void) {
   int nCorrect = 0;
 
   while (fgets(buffer, 100, stdin)) {
-    if (checkReport(buffer)) {
-      nCorrect++;
+    for (int skip = -1; skip < 10; skip++) {
+      int nums[50];
+      int nNums = parseLine(buffer, nums);
+      // printNums(nums, nNums, -1);
+
+      if (checkReport(nums, nNums, skip)) {
+        nCorrect++;
+        break;
+      }
     }
   }
 
-  printf("%d", nCorrect);
+  printf("nCorrect: %d\n", nCorrect);
   return 0;
 }
