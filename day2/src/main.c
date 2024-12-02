@@ -68,11 +68,9 @@ int main(void) {
   int nCorrect = 0;
 
   while (fgets(buffer, 100, stdin)) {
-    for (int skip = -1; skip < 10; skip++) {
-      int nums[50];
-      int nNums = parseLine(buffer, nums);
-      // printNums(nums, nNums, -1);
-
+    int nums[50];
+    int nNums = parseLine(buffer, nums);
+    for (int skip = -1; skip < nNums; skip++) {
       if (checkReport(nums, nNums, skip)) {
         nCorrect++;
         break;
